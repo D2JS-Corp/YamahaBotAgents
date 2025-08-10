@@ -1,0 +1,5 @@
+pipecat-ai[openai-whisper,piper,ollama, silero, webrtc,runner]
+pipecat-ai
+fastapi
+aiortc
+opencv-python
