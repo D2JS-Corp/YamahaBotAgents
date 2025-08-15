@@ -60,7 +60,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
         # --- TTS (Piper) ---
         # Make sure Piper TTS server is running: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/API_HTTP.md
         tts = PiperTTSService(
-            base_url=os.getenv("PIPER_BASE_URL", "http://localhost:5000/api/tts"),
+            base_url=os.getenv("PIPER_BASE_URL", "http://localhost:5000"),
             aiohttp_session=session,
             sample_rate=int(os.getenv("PIPER_SAMPLE_RATE", "22050"))
         )

@@ -1,4 +1,4 @@
-pipecat-ai[openai-whisper,piper,ollama, silero, webrtc,runner]
+pipecat-ai[openai-whisper,ollama, silero, webrtc,runner, cartesia]
 pipecat-ai
 fastapi
 aiortc
