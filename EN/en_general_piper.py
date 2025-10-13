@@ -10,9 +10,9 @@ The example runs a simple voice AI bot that you can connect to using your
 browser and speak with it.
 
 Required AI services:
-- Deepgram (Speech-to-Text)
-- OpenAI (LLM)
-- Cartesia (Text-to-Speech)
+- OPEN-AI Whisper (Speech-to-Text)
+- OLLAMA (LLM)
+- PIPER (Text-to-Speech)
 
 The example connects between client and server using a P2P WebRTC connection.
 
@@ -46,6 +46,7 @@ from pipecat.services.piper.tts import PiperTTSService
 from pipecat.transports.base_transport import BaseTransport, TransportParams
 from pipecat.services.whisper.stt import WhisperSTTService, Model as WhisperModel
 from pipecat.services.ollama.llm import OLLamaLLMService
+from pipecat.transcriptions.language import Language
 
 logger.info("✅ Pipeline components loaded")
 
@@ -56,14 +57,17 @@ logger.info("✅ All components loaded successfully!")
 
 load_dotenv(override=True)
 
-
 async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
     session = aiohttp.ClientSession()
     try:
         logger.info(f"Starting bot")
 
-        stt = WhisperSTTService(model=WhisperModel.SMALL)
+        stt = WhisperSTTService(model=WhisperModel.SMALL, language=Language.ES) #device="cuda"
 
+        # Make sure Piper TTS server is running: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/API_HTTP.md
+        # https://huggingface.co/rhasspy/piper-voices/tree/main/
+        # $python -m piper.download_voices es_MX-claude-high
+        # $python -m piper.http_server -m es_MX-claude-high
         tts = PiperTTSService(
             base_url=os.getenv("PIPER_BASE_URL", "http://localhost:5000"),
             aiohttp_session=session,
@@ -82,7 +86,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
         messages = [
             {
                 "role": "system",
-                "content": "You are a friendly AI assistant. Respond naturally and keep your answers conversational.",
+                "content": "Eres un asistente AI amigable. Responde de manera natural y mantén tus respuestas conversacionales.",
             },
         ]
 
@@ -117,7 +121,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
         async def on_client_connected(transport, client):
             logger.info(f"Client connected")
             # Kick off the conversation.
-            messages.append({"role": "system", "content": "Say hello and briefly introduce yourself."})
+            messages.append({"role": "system", "content": "Di hola y preséntate brevemente. No pongas headers."})
             await task.queue_frames([context_aggregator.user().get_context_frame()])
 
         @transport.event_handler("on_client_disconnected")
@@ -151,5 +155,4 @@ async def bot(runner_args: RunnerArguments):
 
 if __name__ == "__main__":
     from pipecat.runner.run import main
-
     main()

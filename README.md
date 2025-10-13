@@ -23,9 +23,14 @@ This repository is mainly based on the examples and documentation of Pipecat, th
 	pip install -r requirements.txt
 	```
 
+
+
 ## Usage
 
 Agents may run
 	1) An API you can consume in a fronted (All agents)
 	2) A frontend provided by library for debugging.
+
+For debugging:
+	https://whisker.pipecat.ai/
 
