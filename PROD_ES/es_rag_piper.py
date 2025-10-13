@@ -127,10 +127,6 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
         )
 
         # TTS: Piper
-        # Make sure Piper TTS server is running: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/API_HTTP.md
-        # https://huggingface.co/rhasspy/piper-voices/tree/main/
-        # $python -m piper.download_voices es_MX-claude-high
-        # $python -m piper.http_server -m es_MX-claude-high
         tts = PiperTTSService(
             base_url=os.getenv("PIPER_BASE_URL", "http://localhost:5000"),
             aiohttp_session=session,

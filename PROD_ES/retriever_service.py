@@ -10,15 +10,21 @@ import numpy as np
 from typing import List, Dict
 from pydantic import BaseModel
 import uvicorn
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="RAG Retriever Service")
 
-# Global variables
 embeddings_model = None
 index = None
 text_chunks = []
-CHUNK_SIZE = 500  # characters per chunk
-CHUNK_OVERLAP = 100  # overlap between chunks
+CHUNK_SIZE = int(os.getenv('CHUNK_SIZE', 500))  # characters per chunk
+CHUNK_OVERLAP = int(os.getenv('CHUNK_OVERLAP', 100))  # overlap between chunks
+MODEL_NAME = os.getenv('EMBEDDINGS_MODEL', 'all-MiniLM-L6-v2')
+INFORMATION_FILE = os.getenv('INFORMATION_FILE', 'information.txt')
+HOST = os.getenv('HOST', '0.0.0.0')
+PORT = int(os.getenv('PORT', 8700))
 
 class SearchResult(BaseModel):
     id: int
@@ -40,7 +46,7 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVE
     
     return chunks
 
-def load_information(file_path: str = "information.txt"):
+def load_information(file_path: str = INFORMATION_FILE):
     """Load and process the information.txt file"""
     global text_chunks, embeddings_model, index
 
@@ -58,7 +64,7 @@ def load_information(file_path: str = "information.txt"):
 
     # Load embedding model
     print("Loading embedding model (all-MiniLM-L6-v2)...")
-    embeddings_model = SentenceTransformer('all-MiniLM-L6-v2')
+    embeddings_model = SentenceTransformer(MODEL_NAME)
     
     # Create embeddings
     print("Creating embeddings...")
@@ -115,7 +121,7 @@ async def health():
     return {
         "status": "healthy",
         "chunks_indexed": len(text_chunks),
-        "model": "all-MiniLM-L6-v2"
+        "model": MODEL_NAME
     }
 
 @app.post("/reload")
@@ -128,4 +134,4 @@ async def reload_information():
         return {"status": "error", "message": str(e)}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8700)
+    uvicorn.run(app, host=HOST, port=PORT)
