@@ -1,0 +1,57 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    # Jetson necesita runtime GPU:
+    deploy: {}
+    runtime: nvidia
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - ./models/ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+
+  piper:
+    image: dustynv/piper-tts:r36.2.0
+    container_name: piper
+    restart: unless-stopped
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - ./models/piper:/data/models
+    command: ["python3", "-m", "piper.http_server", "-m", "/data/models/es_MX-claude-high"]
+    ports:
+      - "5000:5000"
+
+  app:
+    build:
+      context: ..
+      dockerfile: Jetson/docker/Dockerfile.app
+    image: pipecat-jetson:latest
+    container_name: pipecat-app
+    depends_on:
+      - ollama
+      - piper
+    restart: unless-stopped
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - OLLAMA_BASE_URL=http://ollama:11434/v1
+      - OLLAMA_MODEL=llama3.2:1b
+      - PIPER_BASE_URL=http://piper:5000
+      - PIPER_SAMPLE_RATE=22050
+      - LLM_TEMPERATURE=0.7
+      - LLM_MAX_TOKENS=1000
+    volumes:
+      - ../Jetson/app:/workspace/app
+      - ./models:/workspace/models
+    ports:
+      - "8000:8000"
+

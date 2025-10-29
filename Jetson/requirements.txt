@@ -1,0 +1,12 @@
+pipecat-ai[openai-whisper,ollama,silero,webrtc,runner]
+pipecat-ai
+fastapi
+aiortc
+opencv-python
+sentence-transformers
+chromadb
+piper-tts[http]
+python-dotenv
+torch
+torchaudio
+transformers
